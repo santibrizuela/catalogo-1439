@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1439 Group — Catálogo Mayorista</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;--surface:#0d0d0d;--surface2:#161616;--border:#1e1e1e;
+  --text:#fff;--muted:#888;--gold:#fffbf1;--gold-l:#eadbb4;
+  --r:12px;--r-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;line-height:1.5;min-height:100vh}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;background:rgba(0,0,0,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.h-inner{max-width:1400px;margin:0 auto;padding:.875rem 1.5rem;display:flex;align-items:center;gap:1rem}
+.logo-img{height:44px;width:auto;object-fit:contain}
+.h-div{width:1px;height:28px;background:var(--border)}
+.h-title{font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:500}
+
+/* TABS */
+.tabs-bar{background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:65px;z-index:90}
+.tabs-inner{max-width:1400px;margin:0 auto;padding:0 1.5rem;display:flex;overflow-x:auto;scrollbar-width:none}
+.tabs-inner::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;color:var(--muted);font-size:.8125rem;font-weight:500;letter-spacing:.05em;padding:.875rem 1.25rem;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--gold-l);border-bottom-color:var(--gold-l)}
+
+/* MAIN */
+main{max-width:1400px;margin:0 auto;padding:2rem 1.5rem 5rem}
+.sec-label{font-size:.6875rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem}
+.sec-count{font-size:.875rem;color:var(--muted);margin-bottom:1.5rem}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);border-color:#333;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.card-thumb{position:relative;aspect-ratio:1;overflow:hidden;background:var(--surface2)}
+.card-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.card:hover .card-thumb img{transform:scale(1.04)}
+.card-badge{position:absolute;top:.625rem;left:.625rem;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border-radius:var(--r-sm);padding:.25rem .5rem;font-size:.625rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-l);border:1px solid rgba(212,168,67,.3)}
+.card-body{padding:1rem 1.125rem 1.25rem}
+.card-name{font-size:.875rem;font-weight:600;line-height:1.3;margin-bottom:.5rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-from{font-size:.625rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.card-price{font-size:1.25rem;font-weight:700;color:var(--gold-l);margin-top:.125rem}
+.card-foot{margin-top:.875rem;padding-top:.875rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-stock{display:flex;align-items:center;gap:.375rem;font-size:.625rem;color:#4ade80}
+.card-stock::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0}
+.card-cta{font-size:.6875rem;color:var(--muted);font-weight:500}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:900px;max-height:90vh;overflow-y:auto;position:relative;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.modal-top{position:sticky;top:0;z-index:10;display:flex;justify-content:flex-end;padding:1rem 1rem 0;background:linear-gradient(var(--surface),transparent)}
+.close-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.125rem;transition:background .2s}
+.close-btn:hover{background:#222}
+.modal-body{padding:0 1.5rem 2rem}
+.m-layout{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+@media(max-width:640px){.m-layout{grid-template-columns:1fr}}
+
+/* Gallery */
+.g-main{aspect-ratio:1;background:var(--surface2);border-radius:var(--r);overflow:hidden;margin-bottom:.625rem}
+.g-main img{width:100%;height:100%;object-fit:cover;transition:opacity .2s}
+.g-thumbs{display:flex;gap:.5rem;flex-wrap:wrap}
+.g-thumb{width:58px;height:58px;border-radius:var(--r-sm);overflow:hidden;cursor:pointer;border:2px solid transparent;transition:border-color .2s;background:var(--surface2);flex-shrink:0}
+.g-thumb.active{border-color:var(--gold-l)}
+.g-thumb img{width:100%;height:100%;object-fit:cover}
+
+/* Modal content */
+.m-name{font-size:1.375rem;font-weight:700;line-height:1.25;margin-bottom:1rem}
+.m-desc{font-size:.875rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.6}
+.feat-list{list-style:none;margin-bottom:1.5rem}
+.feat-list li{font-size:.8125rem;padding:.3rem 0;display:flex;align-items:flex-start;gap:.5rem;color:#ccc;border-bottom:1px solid var(--border)}
+.feat-list li:last-child{border-bottom:none}
+.feat-list li::before{content:'✓';color:var(--gold-l);font-weight:700;flex-shrink:0;margin-top:1px}
+.m-extra{font-size:.8125rem;color:var(--muted);margin-bottom:1.25rem}
+
+/* Price table */
+.pt-title{font-size:.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.625rem}
+.pt{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}
+.pt th{text-align:left;padding:.5rem .75rem;background:var(--surface2);color:var(--muted);font-size:.75rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.pt th:first-child{border-radius:6px 0 0 6px}
+.pt th:last-child{border-radius:0 6px 6px 0;text-align:right}
+.pt td{padding:.625rem .75rem;border-bottom:1px solid var(--border);color:#ddd}
+.pt td:last-child{text-align:right;font-weight:600;color:var(--gold-l)}
+.pt tr:last-child td{border-bottom:none}
+.pt tr.best td{background:rgba(212,168,67,.05)}
+.best-tag{background:var(--gold);color:#000;font-size:.5625rem;font-weight:700;padding:.125rem .375rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-left:.375rem;vertical-align:middle}
+.m-note{font-size:.75rem;color:var(--muted);text-align:center;margin-bottom:1.25rem}
+
+/* WA button */
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:.625rem;width:100%;padding:.875rem;background:#25d366;color:#fff;font-weight:700;font-size:.9375rem;border-radius:var(--r);text-decoration:none;transition:background .2s,transform .1s}
+.wa-btn:hover{background:#20b858;transform:translateY(-1px)}
+.wa-btn:active{transform:translateY(0)}
+
+/* Fragrance grid */
+.frag-section-title{font-size:.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:1.25rem 0 .625rem}
+.frag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:.5rem;margin-bottom:1rem}
+.frag-item{cursor:pointer;text-align:center}
+.frag-item img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:var(--r-sm);border:2px solid var(--border);transition:border-color .2s}
+.frag-item:hover img,.frag-item.active img{border-color:var(--gold-l)}
+.frag-name{font-size:.5625rem;color:var(--muted);margin-top:.25rem;line-height:1.2}
+
+/* FAB */
+.wa-fab{position:fixed;bottom:1.5rem;right:1.5rem;width:56px;height:56px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:200;transition:transform .2s,box-shadow .2s;text-decoration:none}
+.wa-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(37,211,102,.45)}
+
+/* Responsive */
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr 1fr;gap:.75rem}
+  main{padding:1.25rem 1rem 5rem}
+  .card-name{font-size:.8125rem}
+  .card-price{font-size:1.125rem}
+  .modal-body{padding:0 1rem 2rem}
+}
+@media(max-width:360px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-inner">
+    <img src="assets/logo.png" alt="1439 Group" class="logo-img" onerror="this.style.display='none'">
+    <div class="h-div"></div>
+    <span class="h-title">Catálogo Mayorista</span>
+  </div>
+</header>
+
+<nav class="tabs-bar">
+  <div class="tabs-inner">
+    <button class="tab-btn active" data-cat="all">Todos</button>
+    <button class="tab-btn" data-cat="tecnologia">Tecnología</button>
+    <button class="tab-btn" data-cat="hogar">Hogar</button>
+    <button class="tab-btn" data-cat="deportes">Deportes & Oficial</button>
+    <button class="tab-btn" data-cat="moda">Moda</button>
+    <button class="tab-btn" data-cat="perfumeria">Perfumería</button>
+  </div>
+</nav>
+
+<main>
+  <div class="sec-label">Ofertas disponibles</div>
+  <div class="sec-count" id="countLabel"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <div class="modal-top">
+      <button class="close-btn" onclick="closeModal()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<a href="#" class="wa-fab" id="waFab" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.555 4.122 1.524 5.855L0 24l6.335-1.509A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.015-1.379l-.36-.214-3.73.889.905-3.635-.235-.373A9.818 9.818 0 1112 21.818z"/></svg>
+</a>
+
+<script>
+const WA = '5491151758558'; // ← Reemplazá con tu número (sin +, sin espacios)
+
+const P = [
+  {
+    id:'airpods-pro2',name:'AirPods Pro 2 con Cancelación de Ruido',
+    cat:'tecnologia',badge:'Tech',
+    desc:'Aislá el ruido exterior y disfrutá de una experiencia de audio superior.',
+    feat:['Cancelación de sonido externo (ANC)','Excelente calidad de audio','Micrófono incorporado','Conexión Bluetooth','Estuche de carga','Diseño compacto y cómodo'],
+    prices:[{q:'1 unidad',p:'$12.250'},{q:'20 unidades',p:'$11.250'},{q:'40 unidades',p:'$11.000'},{q:'60 unidades',p:'$10.750',best:1}],
+    imgs:['1439catalogo/AIRPODS PRO 2 CON CANCELACIÓN DE RUIDO/AIRPODS PRO 2 CON CANCELACIÓN DE RUIDOProducto.png','1439catalogo/AIRPODS PRO 2 CON CANCELACIÓN DE RUIDO/AIRPODS PRO 2 CON CANCELACIÓN DE RUIDOBgBoxes.png.jpeg','1439catalogo/AIRPODS PRO 2 CON CANCELACIÓN DE RUIDO/AIRPODS PRO 2 CON CANCELACIÓN DE RUIDOGeminiAccion.png'],
+  },
+  {
+    id:'airpod-max',name:'Auriculares AirPod Max',
+    cat:'tecnologia',badge:'Premium',
+    desc:'Sonido envolvente y diseño premium. Disponibles en 6 colores: Blanco, Negro, Naranja, Rojo, Violeta, Azul.',
+    feat:['Sonido envolvente de alta fidelidad','Diseño premium','6 colores disponibles','Stock para entrega inmediata','Excelente margen para revendedores'],
+    prices:[{q:'1 unidad',p:'$18.495'},{q:'25 unidades',p:'$17.100'},{q:'50 unidades',p:'$16.650'},{q:'90 unidades',p:'$16.280',best:1}],
+    imgs:['1439catalogo/AURICULARES AIRPOD MAX/AURICULARES AIRPOD MAXProducto.jpeg','1439catalogo/AURICULARES AIRPOD MAX/AURICULARES AIRPOD MAXAccion.png'],
+  },
+  {
+    id:'cable-plano',name:'Cable Plano Carga Rápida 4 en 1',
+    cat:'tecnologia',badge:'Accesorios',
+    desc:'USB-C / USB-A / Lightning. 1 metro, potencia 65W/27W, plano y resistente.',
+    feat:['Conector USB-C y USB-A','Conector USB-C y Lightning','1 metro de largo','Potencia 65W / 27W','Plano y resistente'],
+    prices:[{q:'20 unidades',p:'$1.565'},{q:'100 unidades',p:'$1.440'},{q:'250 unidades',p:'$1.405'},{q:'400 unidades',p:'$1.375',best:1}],
+    imgs:['1439catalogo/Cable Plano Carga Rápida 4 En 1 usb-a  Usb-c  Lightning/Cable Plano Carga Rápida 4 En 1 usb-a  Usb-c  Lightning Producto.png','1439catalogo/Cable Plano Carga Rápida 4 En 1 usb-a  Usb-c  Lightning/Cable Plano Carga Rápida 4 En 1 usb-a  Usb-c  Lightning Producto2GeminiUpgradeMedidas.png','1439catalogo/Cable Plano Carga Rápida 4 En 1 usb-a  Usb-c  Lightning/Cable Plano Carga Rápida 4 En 1 usb-a  Usb-c  LightningProductoGeminiAccion.png'],
+  },
+  {
+    id:'combo-cargador',name:'Combo Cargador USB-C 20W + Cable 1 Metro',
+    cat:'tecnologia',badge:'Combo',
+    desc:'Carga rápida para iPhone y dispositivos compatibles. Cable USB-C a Lightning o USB-C a USB-C.',
+    feat:['Cargador USB-C 20W','Cable USB-C a Lightning 1 metro','Compatibilidad con USB-C a USB-C','Excelente calidad','Ideal para reventa'],
+    prices:[{q:'1 unidad',p:'$5.500'},{q:'10 unidades',p:'$4.850'},{q:'20 unidades',p:'$4.650'},{q:'30 unidades',p:'$4.555',best:1}],
+    imgs:['1439catalogo/COMBO CARGADOR USB-C 20W + CABLE USB-C A LIGHTNING O USB-C A USB-C DE 1 METRO/COMBO CARGADOR USB-C 20W + CABLE USB-C A LIGHTNING O USB-C A USB-C DE 1 METROProducto.png','1439catalogo/COMBO CARGADOR USB-C 20W + CABLE USB-C A LIGHTNING O USB-C A USB-C DE 1 METRO/COMBO CARGADOR USB-C 20W + CABLE USB-C A LIGHTNING O USB-C A USB-C DE 1 METROGeminiAccionApple.png'],
+  },
+  {
+    id:'caloventor',name:'Caloventor Star Trak STC122 — 2000W',
+    cat:'hogar',badge:'Invierno',
+    desc:'Calefacción eficiente con 2 niveles de potencia, función ventilador y garantía oficial de 1 año.',
+    feat:['2 niveles: 1000W y 2000W','Función ventilador fría','Uso vertical y horizontal','Termostato regulable','Silencioso','Manija para transportar','Garantía oficial 1 año'],
+    extra:'Medidas: 240mm profundidad × 250mm alto × 120mm ancho',
+    prices:[{q:'1 unidad',p:'$22.200'},{q:'20 unidades',p:'$20.500'},{q:'45 unidades',p:'$20.000'},{q:'75 unidades',p:'$19.550',best:1}],
+    imgs:['1439catalogo/Caloventor Star Trak STC122 - 2000W/Caloventor Star Trak STC122 - 2000WProducto.jpeg','1439catalogo/Caloventor Star Trak STC122 - 2000W/Caloventor Star Trak STC122 - 2000WGeminiAccion.png','1439catalogo/Caloventor Star Trak STC122 - 2000W/Caloventor Star Trak STC122 - 2000WProductoMedidas.png','1439catalogo/Caloventor Star Trak STC122 - 2000W/Caloventor Star Trak STC122 - 2000WBgBoxes.jpeg'],
+  },
+  {
+    id:'estufa',name:'Estufa Star Trak STH125 Halógena Fija 1200W',
+    cat:'hogar',badge:'Invierno',
+    desc:'Estufa halógena con 3 velas, 3 niveles de potencia y garantía de 1 año.',
+    feat:['3 velas halógenas','3 niveles: 400W / 800W / 1200W','Manija para transportar','Guarda cable incorporado','Diseño compacto','Garantía 1 año'],
+    extra:'Medidas: 350mm ancho × 480mm alto × 200mm prof.',
+    prices:[{q:'1 unidad',p:'$31.220'},{q:'15 unidades',p:'$30.230'},{q:'30 unidades',p:'$29.575'},{q:'50 unidades',p:'$28.920',best:1}],
+    imgs:['1439catalogo/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200W/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200WProducto.png','1439catalogo/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200W/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200WProductoOn.png','1439catalogo/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200W/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200WAccionGemini2Estudio.png','1439catalogo/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200W/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200WProductoMedidas.png','1439catalogo/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200W/ESTUFA STAR TRAK STH125 HALÓGENA FIJA 1200WBgBoxes.jpeg'],
+  },
+  {
+    id:'mopa',name:'Mopa Escurridora Centrífuga',
+    cat:'hogar',badge:'Hogar',
+    desc:'Olvidate de mojarte las manos. Rotación 360°, súper absorbente y mango regulable.',
+    feat:['Rotación 360°','Súper absorbente','Liviana y cómoda','Escurrido rápido','Mango regulable hasta 110 cm','Colores: Azul, Verde, Negro'],
+    prices:[{q:'1 unidad',p:'$13.570'},{q:'5 unidades',p:'$12.900'},{q:'25 unidades',p:'$12.215'},{q:'50 unidades',p:'$11.945',best:1}],
+    imgs:['1439catalogo/MOPA ESCURRIDORA CENTRÍFUGA/MOPA ESCURRIDORA CENTRÍFUGAProductoBlack.png','1439catalogo/MOPA ESCURRIDORA CENTRÍFUGA/MOPA ESCURRIDORA CENTRÍFUGAGeminiAccion.png'],
+  },
+  {
+    id:'pava',name:'Pava Eléctrica Opeka — Acero Inox. 2 Litros',
+    cat:'hogar',badge:'Hogar',
+    desc:'Hervidora de acero inoxidable, 2 litros. Ideal para hogar, oficina o negocio.',
+    feat:['Capacidad 2 litros','Potencia 1500W — 220V','Acero inoxidable','Base con rotación 360°','Luz LED indicadora','Calentamiento rápido','Diseño moderno y resistente'],
+    prices:[{q:'1 unidad',p:'$13.400'},{q:'20 unidades',p:'$12.300'},{q:'40 unidades',p:'$12.000'},{q:'60 unidades',p:'$11.750',best:1}],
+    imgs:['1439catalogo/PAVA ELÉCTRICA OPEKA HERVIDORA DE ACERO INOXIDABLE – 2 LITROS/PAVA ELÉCTRICA OPEKA HERVIDORA DE ACERO INOXIDABLE – 2 LITROSProducto.png','1439catalogo/PAVA ELÉCTRICA OPEKA HERVIDORA DE ACERO INOXIDABLE – 2 LITROS/PAVA ELÉCTRICA OPEKA HERVIDORA DE ACERO INOXIDABLE – 2 LITROSAccionGemini.png','1439catalogo/PAVA ELÉCTRICA OPEKA HERVIDORA DE ACERO INOXIDABLE – 2 LITROS/PAVA ELÉCTRICA OPEKA HERVIDORA DE ACERO INOXIDABLE – 2 LITROSBgBoxes.jpeg'],
+  },
+  {
+    id:'bandera',name:'Bandera Argentina',
+    cat:'deportes',badge:'Argentina',
+    desc:'150 × 90 cm. Ideal para colgar, exhibir o acompañar cada festejo patriótico.',
+    feat:['Medidas: 150 × 90 cm','Hueco para asta','Cordón de ajuste incluido','Liviana y resistente','Para eventos, balcones, negocios y escuelas'],
+    prices:[{q:'1 unidad',p:'$3.910'},{q:'30 unidades',p:'$3.595'},{q:'60 unidades',p:'$3.515'},{q:'90 unidades',p:'$3.440',best:1}],
+    imgs:['1439catalogo/BANDERA ARGENTINA/BANDERA ARGENTINAProductoBg1439.jpeg','1439catalogo/BANDERA ARGENTINA/BANDERA ARGENTINAProductoGemini.png'],
+  },
+  {
+    id:'botella-afa',name:'Botella de Aluminio AFA Oficial — 500ml',
+    cat:'deportes',badge:'Oficial AFA',
+    desc:'Llevá tu pasión por la Selección a todos lados. Producto oficial AFA, 4 modelos.',
+    feat:['Producto oficial AFA','Capacidad 500 ml','Tapa clicker de fácil apertura','Fabricada en aluminio','Diseño coleccionable','4 modelos disponibles'],
+    prices:[{q:'1 unidad',p:'$5.060'},{q:'24 unidades',p:'$4.650'},{q:'72 unidades',p:'$4.550'},{q:'120 unidades',p:'$4.450',best:1}],
+    imgs:['1439catalogo/BOTELLA DE ALUMINIO AFA OFICIAL/BOTELLA DE ALUMINIO AFA OFICIALTodosBgBoxes.jpeg','1439catalogo/BOTELLA DE ALUMINIO AFA OFICIAL/BOTELLA DE ALUMINIO AFA OFICIALBgBoxes.jpeg','1439catalogo/BOTELLA DE ALUMINIO AFA OFICIAL/BOTELLA DE ALUMINIO AFA OFICIALMessiBgBoxes.jpeg','1439catalogo/BOTELLA DE ALUMINIO AFA OFICIAL/BOTELLA DE ALUMINIO AFA OFICIALDibuBgBoxes.jpeg','1439catalogo/BOTELLA DE ALUMINIO AFA OFICIAL/BOTELLA DE ALUMINIO AFA OFICIALFideBgBoxes.jpeg'],
+  },
+  {
+    id:'tobillera',name:'Tobillera de Compresión Deportiva',
+    cat:'deportes',badge:'Deporte',
+    desc:'Mayor estabilidad y comodidad para entrenar. Ajuste cruzado doble reforzado.',
+    feat:['Ajuste cruzado doble reforzado','Compresión regulable','Material transpirable','Diseño anatómico','Fácil de colocar','Ideal para Running, Fútbol, Gimnasio y Caminatas'],
+    prices:[{q:'1 unidad',p:'$1.625'},{q:'20 unidades',p:'$1.495'},{q:'40 unidades',p:'$1.405'},{q:'60 unidades',p:'$1.375',best:1}],
+    imgs:['1439catalogo/TOBILLERA DE COMPRESIÓN DEPORTIVA/TOBILLERA DE COMPRESIÓN DEPORTIVA Edit.jpg','1439catalogo/TOBILLERA DE COMPRESIÓN DEPORTIVA/TOBILLERA DE COMPRESIÓN DEPORTIVA Doble.webp','1439catalogo/TOBILLERA DE COMPRESIÓN DEPORTIVA/TOBILLERA DE COMPRESIÓN DEPORTIVA GeminiPack2.png','1439catalogo/TOBILLERA DE COMPRESIÓN DEPORTIVA/TOBILLERA DE COMPRESIÓN DEPORTIVA ProductoMedidas.png'],
+  },
+  {
+    id:'album-panini',name:'Álbum Panini Oficial Brasil',
+    cat:'deportes',badge:'Panini',
+    desc:'Álbum oficial Panini Brasil. Stock inmediato, envíos a todo el país.',
+    feat:['Producto oficial Panini','Álbum Brasil edición especial','Stock inmediato','Envíos a todo el país'],
+    prices:[{q:'1 unidad',p:'$13.500'},{q:'10 unidades',p:'$12.500'},{q:'20 unidades',p:'$11.000'},{q:'40 unidades',p:'$10.500'},{q:'100 unidades',p:'$9.800',best:1}],
+    imgs:['1439catalogo/ÁLBUM PANINI OFICIAL BRASIL/ÁLBUM PANINI OFICIAL BRASILBgHandBoxes.jpeg'],
+  },
+  {
+    id:'kigurumi-adulto',name:'Kigurumi Stitch — Talle Adulto',
+    cat:'moda',badge:'Invierno',
+    desc:'El abrigo más cómodo y divertido para este invierno. Tela suave y confortable.',
+    feat:['Tela suave y confortable','Diseño Stitch','Excelente abrigo','Ideal para casa, eventos o regalo','Talles: S — M — L — XL'],
+    prices:[{q:'1 unidad',p:'$15.750'},{q:'30 unidades',p:'$14.470'},{q:'65 unidades',p:'$14.150'},{q:'100 unidades',p:'$13.835',best:1}],
+    imgs:['1439catalogo/KIGURUMI STITCH TALLE DE ADULTO/KIGURUMI STITCH TALLE DE ADULTOProducto.png','1439catalogo/KIGURUMI STITCH TALLE DE ADULTO/KIGURUMI STITCH TALLE DE ADULTOGeminiAccion.png','1439catalogo/KIGURUMI STITCH TALLE DE ADULTO/KIGURUMI STITCH TALLE DE ADULTOGeminiAccion2edit.png'],
+  },
+  {
+    id:'kigurumi-nino',name:'Kigurumi Stitch — Talle Niño',
+    cat:'moda',badge:'Invierno',
+    desc:'Diseño Stitch, tela suave. Ideal para el invierno, pijamadas y disfraces.',
+    feat:['Diseño inspirado en Stitch','Tela suave y confortable','Ideal para invierno, pijamadas y disfraces','Talles: 100 — 110 — 120 — 130 — 140 cm'],
+    prices:[{q:'1 unidad',p:'$14.650'},{q:'30 unidades',p:'$13.885'},{q:'65 unidades',p:'$13.150'},{q:'100 unidades',p:'$12.860',best:1}],
+    imgs:['1439catalogo/KIGURUMI STITCH TALLE DE NIÑO/KIGURUMI STITCH TALLE DE NIÑOProducto.png','1439catalogo/KIGURUMI STITCH TALLE DE NIÑO/KIGURUMI STITCH TALLE DE NIÑOGeminiAccion.png','1439catalogo/KIGURUMI STITCH TALLE DE NIÑO/KIGURUMI STITCH TALLE DE NIÑOGeminiProducto.png'],
+  },
+  {
+    id:'body-splash',name:'Combo Body Splash Armaf Odyssey',
+    cat:'perfumeria',badge:'Perfumería',
+    desc:'11 fragancias disponibles. Envase de 250ml. Elegí tu favorita o llevate varias para combinar.',
+    feat:['11 fragancias disponibles','Envase 250ml','Ideal para uso diario','Stock inmediato','Envíos a todo el país'],
+    prices:[{q:'1 unidad',p:'$10.490'},{q:'36 unidades',p:'$9.645'},{q:'54 unidades',p:'$9.435'},{q:'72 unidades',p:'$9.225',best:1}],
+    imgs:['1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/COMBO BODY SPLASH ARMAF ODYSSEYProducto.png'],
+    frags:[
+      {n:'Aoud',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashArmafOdysseyAoud.jpeg'},
+      {n:'Aqua',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashArmafOdysseyAqua.jpeg'},
+      {n:'Artisto',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashArmafOdysseyArtisto.jpeg'},
+      {n:'Candee',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashArmafOdysseyCandee.jpeg'},
+      {n:'Dubai',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashArmafOdysseyDubai.jpeg'},
+      {n:'Revolution',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashArmafOdysseyRevolution.jpeg'},
+      {n:'Wild One',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashArmafOdysseyWildOne.jpeg'},
+      {n:'Limoni',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashOdysseyArmafLimoni.jpeg'},
+      {n:'Mandarin',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashOdysseyArmafMandarin.jpeg'},
+      {n:'Mandarin Sky',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashOdysseyArmafMandarinSky.jpeg'},
+      {n:'Mega',i:'1439catalogo/COMBO BODY SPLASH ARMAF ODYSSEY/BODYSPLASHARMAF/bodySplashOdysseyArmafMega.jpeg'},
+    ],
+  },
+];
+
+function enc(path){
+  return path.split('/').map(s=>encodeURIComponent(s)).join('/');
+}
+
+let activeCat='all';
+
+function renderGrid(cat){
+  activeCat=cat;
+  const list=cat==='all'?P:P.filter(p=>p.cat===cat);
+  document.getElementById('countLabel').textContent=list.length+' producto'+(list.length!==1?'s':'');
+  document.getElementById('grid').innerHTML=list.map(p=>`
+    <article class="card" onclick="openModal('${p.id}')">
+      <div class="card-thumb">
+        <img src="${enc(p.imgs[0])}" alt="${p.name}" loading="lazy">
+        <span class="card-badge">${p.badge}</span>
+      </div>
+      <div class="card-body">
+        <h2 class="card-name">${p.name}</h2>
+        <p class="card-from">Desde</p>
+        <p class="card-price">${p.prices[0].p} c/u</p>
+        <div class="card-foot">
+          <span class="card-stock">Stock inmediato</span>
+          <span class="card-cta">Ver más →</span>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid(btn.dataset.cat);
+  });
+});
+
+let modalProduct=null;
+
+function openModal(id){
+  const p=P.find(x=>x.id===id);
+  if(!p)return;
+  modalProduct=p;
+
+  const thumbsHtml=p.imgs.length>1
+    ?'<div class="g-thumbs">'+p.imgs.map((img,i)=>`
+        <div class="g-thumb${i===0?' active':''}" onclick="setImg(${i})" id="gth${i}">
+          <img src="${enc(img)}" alt="img${i}" loading="lazy">
+        </div>`).join('')+'</div>'
+    :'';
+
+  const fragsHtml=p.frags
+    ?`<p class="frag-section-title">11 Fragancias disponibles</p>
+       <div class="frag-grid">`+p.frags.map((f,i)=>`
+         <div class="frag-item" id="fr${i}" onclick="setFrag(${i})">
+           <img src="${enc(f.i)}" alt="${f.n}" loading="lazy">
+           <p class="frag-name">${f.n}</p>
+         </div>`).join('')+'</div>'
+    :'';
+
+  const featHtml=p.feat
+    ?'<ul class="feat-list">'+p.feat.map(f=>`<li>${f}</li>`).join('')+'</ul>'
+    :'';
+
+  const extraHtml=p.extra
+    ?`<p class="m-extra">📐 ${p.extra}</p>`:'';
+
+  const priceRows=p.prices.map(pr=>`
+    <tr${pr.best?' class="best"':''}>
+      <td>${pr.q}${pr.best?'<span class="best-tag">Mejor precio</span>':''}</td>
+      <td>${pr.p} c/u</td>
+    </tr>`).join('');
+
+  const waMsg=encodeURIComponent('Hola! Me interesa: '+p.name+'. ¿Podés darme más información?');
+
+  document.getElementById('modalBody').innerHTML=`
+    <div class="m-layout">
+      <div>
+        <div class="g-main"><img src="${enc(p.imgs[0])}" alt="${p.name}" id="gMainImg"></div>
+        ${thumbsHtml}
+        ${fragsHtml}
+      </div>
+      <div>
+        <h2 class="m-name">${p.name}</h2>
+        <p class="m-desc">${p.desc}</p>
+        ${featHtml}
+        ${extraHtml}
+        <p class="pt-title">Precios por cantidad</p>
+        <table class="pt">
+          <thead><tr><th>Cantidad</th><th>Precio unitario</th></tr></thead>
+          <tbody>${priceRows}</tbody>
+        </table>
+        <p class="m-note">✈️ Envíos a todo el país &nbsp;·&nbsp; Mientras más llevás, mejor precio</p>
+        <a href="https://wa.me/${WA}?text=${waMsg}" class="wa-btn" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.555 4.122 1.524 5.855L0 24l6.335-1.509A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.015-1.379l-.36-.214-3.73.889.905-3.635-.235-.373A9.818 9.818 0 1112 21.818z"/></svg>
+          Consultar por WhatsApp
+        </a>
+      </div>
+    </div>`;
+
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('waFab').href=`https://wa.me/${WA}?text=${waMsg}`;
+}
+
+function setImg(i){
+  if(!modalProduct)return;
+  document.getElementById('gMainImg').src=enc(modalProduct.imgs[i]);
+  document.querySelectorAll('.g-thumb').forEach((t,j)=>t.classList.toggle('active',j===i));
+}
+
+function setFrag(i){
+  if(!modalProduct||!modalProduct.frags)return;
+  document.getElementById('gMainImg').src=enc(modalProduct.frags[i].i);
+  document.querySelectorAll('.frag-item').forEach((f,j)=>f.classList.toggle('active',j===i));
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+  document.getElementById('waFab').href=`https://wa.me/${WA}`;
+  modalProduct=null;
+}
+
+document.getElementById('overlay').addEventListener('click',e=>{
+  if(e.target===e.currentTarget)closeModal();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+renderGrid('all');
+document.getElementById('waFab').href=`https://wa.me/${WA}`;
+</script>
+</body>
+</html>
